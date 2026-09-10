@@ -1,0 +1,16 @@
+{
+  "catboost_test": {
+    "n": 22747,
+    "tasa_base": 0.1614,
+    "roc_auc": 0.8023,
+    "pr_auc": 0.3867,
+    "brier": 0.1806
+  },
+  "baseline_test": {
+    "n": 22747,
+    "tasa_base": 0.1614,
+    "roc_auc": 0.793,
+    "pr_auc": 0.3729,
+    "brier": 0.1844
+  }
+}

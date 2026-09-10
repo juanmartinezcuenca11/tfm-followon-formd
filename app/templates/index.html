@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoring de follow-on funding</title>
+  <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+           max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a2a3a; }
+    h1 { color: #1F497D; border-bottom: 2px solid #1F78B4; padding-bottom: .4rem; }
+    h2 { color: #1F78B4; }
+    form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+    .full { grid-column: 1 / 3; }
+    label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .2rem; }
+    input, select { width: 100%; padding: .45rem; border: 1px solid #ccd; border-radius: 6px; box-sizing: border-box; }
+    .checks { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .checks label { font-weight: 400; display: flex; align-items: center; gap: .3rem; }
+    button { grid-column: 1 / 3; background: #1F497D; color: #fff; border: 0;
+             padding: .7rem; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    .card { border: 1px solid #dde; border-radius: 12px; padding: 1.2rem 1.5rem; margin-top: 1.5rem; }
+    .prob { font-size: 2.4rem; font-weight: 700; }
+    .alta { color: #1a8f3c; } .media { color: #c98a00; } .baja { color: #b3341f; }
+    .factores { display: flex; gap: 2rem; }
+    .memo { background: #f5f8fb; border-left: 4px solid #1F78B4; padding: .8rem 1rem;
+            margin-top: 1rem; border-radius: 6px; line-height: 1.5; }
+    ul { margin: .3rem 0; padding-left: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1>Predicción de follow-on funding</h1>
+  <p>Introduce las características de una primera ronda (Form D) para estimar su
+     probabilidad de financiación posterior.</p>
+
+  <form method="post">
+    <div>
+      <label>Sector</label>
+      <select name="sector">
+        {% for v in opciones["INDUSTRYGROUPTYPE"] %}<option>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Estado / país</label>
+      <select name="estado">
+        {% for v in opciones["STATEORCOUNTRY"] %}<option>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Forma jurídica</label>
+      <select name="entitytype">
+        {% for v in opciones["ENTITYTYPE"] %}<option>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Antigüedad</label>
+      <select name="antiguedad">
+        {% for v in opciones["ANTIGUEDAD"] %}<option>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Tramo de ingresos</label>
+      <select name="revenue">
+        {% for v in opciones["REVENUERANGE"] %}<option>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Antigüedad de la empresa</label>
+      <input type="text" value="(según desplegable)" disabled>
+    </div>
+    <div>
+      <label>Importe objetivo ($)</label>
+      <input type="number" name="objetivo" value="1000000" min="0" step="10000">
+    </div>
+    <div>
+      <label>Importe colocado ($)</label>
+      <input type="number" name="vendido" value="750000" min="0" step="10000">
+    </div>
+    <div>
+      <label>Nº de inversores</label>
+      <input type="number" name="n_inversores" value="5" min="0">
+    </div>
+    <div>
+      <label>Nº de directivos</label>
+      <input type="number" name="n_directivos" value="3" min="0">
+    </div>
+    <div>
+      <label>Inversión mínima ($)</label>
+      <input type="number" name="min_inv" value="25000" min="0" step="1000">
+    </div>
+    <div></div>
+    <div class="full">
+      <label>Instrumento y otros</label>
+      <div class="checks">
+        <label><input type="checkbox" name="equity" checked> Equity</label>
+        <label><input type="checkbox" name="deuda"> Deuda</label>
+        <label><input type="checkbox" name="convertible"> Convertible/SAFE</label>
+        <label><input type="checkbox" name="opciones"> Opciones</label>
+        <label><input type="checkbox" name="comisiones"> Paga comisiones</label>
+      </div>
+    </div>
+    <button type="submit">Calcular probabilidad</button>
+  </form>
+
+  {% if resultado %}
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="prob {{ 'alta' if resultado.prob >= 0.30 else 'media' if resultado.prob >= 0.18 else 'baja' }}">
+      {{ resultado.prob_pct }}
+    </div>
+    <p>probabilidad estimada de follow-on (calibrada, horizonte 3 años)</p>
+
+    <div class="factores">
+      <div>
+        <strong>Empujan al alza</strong>
+        <ul>{% for n, v in resultado.positivos %}<li>{{ n }}</li>{% endfor %}</ul>
+      </div>
+      <div>
+        <strong>Empujan a la baja</strong>
+        <ul>{% for n, v in resultado.negativos %}<li>{{ n }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+
+    <div class="memo">{{ resultado.memo }}</div>
+  </div>
+  {% endif %}
+</body>
+</html>
